@@ -55,7 +55,7 @@
   </header>
 
   <div class="admin-panel">
-    <!-- قسم إدارة المنتجات -->
+    <!-- إدارة المنتجات -->
     <h2>📦 إدارة المنتجات</h2>
     <form id="addProductForm" class="add-product-form">
       <input type="text" id="prodName" placeholder="اسم المنتج" required>
@@ -67,18 +67,17 @@
       <input type="text" id="quantityDiscounts" placeholder="خصومات الكمية (مثال: 1=449,2=400,3=380)">
       <button type="submit">➕ إضافة منتج</button>
     </form>
-
     <div class="products-list" id="productsList"></div>
 
     <hr style="margin: 40px 0;">
 
-    <!-- قسم إدارة الطلبات -->
+    <!-- إدارة الطلبات -->
     <h2>📋 إدارة الطلبات</h2>
     <div id="ordersList"></div>
 
     <hr style="margin: 40px 0;">
 
-    <!-- قسم إدارة الأقسام -->
+    <!-- إدارة الأقسام -->
     <h2>📂 إدارة الأقسام</h2>
     <form id="addCategoryForm" class="add-product-form" style="grid-template-columns: 1fr 1fr;">
       <input type="text" id="catName" placeholder="اسم القسم" required>
@@ -90,24 +89,16 @@
 
   <script type="module">
     import { db, ref, set, push, onValue, remove, update } from './config.js';
-    import { auth, onAuthStateChanged, signOut } from './config.js';
 
-    // 1. التحقق من تسجيل الدخول
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
-      }
-    });
+    // ====== التحقق من تسجيل الدخول بكلمة المرور ======
+    if (localStorage.getItem('adminLoggedIn') !== 'true') {
+      window.location.href = 'login.html';
+    }
 
-    // 2. زر تسجيل الخروج (موجود في الهيدر)
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-        window.location.href = 'login.html';
-      } catch (error) {
-        console.error("خطأ في تسجيل الخروج:", error);
-        alert("حدث خطأ أثناء تسجيل الخروج، حاول مرة أخرى.");
-      }
+    // ====== زر تسجيل الخروج ======
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('adminLoggedIn');
+      window.location.href = 'login.html';
     });
 
     // ====== الأقسام ======
@@ -158,7 +149,7 @@
           alert('✅ تم إضافة القسم بنجاح!');
         } catch (error) {
           console.error(error);
-          alert('❌ حدث خطأ في إضافة القسم، تأكد من اتصال Firebase.');
+          alert('❌ حدث خطأ في إضافة القسم');
         }
       }
     });
