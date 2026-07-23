@@ -1,11 +1,9 @@
-// config.js
+// config.js – نسخة مبسطة (بدون Auth)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// 🔥🔥🔥 بياناتك بالضبط (من اللقطة اللي بعتها) 🔥🔥🔥
 const firebaseConfig = {
-  apiKey: "AIzaSyC6Ks_YBbBLWijekEo2kELjiZ3ewR6fzrU",
+  apiKey: "AIzaSyBvNcTEgRq_ghnGNnkTzF39q0fz-xnZbts",
   authDomain: "prfum-b8275.firebaseapp.com",
   databaseURL: "https://prfum-b8275-default-rtdb.firebaseio.com",
   projectId: "prfum-b8275",
@@ -15,9 +13,7 @@ const firebaseConfig = {
   measurementId: "G-2428ZKY9LR"
 };
 
-// تهيئة Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const auth = getAuth(app);
 
-export { db, ref, set, push, onValue, remove, update, auth, signInWithEmailAndPassword, onAuthStateChanged, signOut };
+export { db, ref, set, push, onValue, remove, update };
