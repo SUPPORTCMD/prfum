@@ -65,71 +65,44 @@
       margin-top: 10px;
       display: none;
     }
-    #detailedError {
-      color: #d32f2f;
-      font-size: 14px;
-      text-align: center;
-      margin-top: 10px;
-      background: #ffebee;
-      padding: 10px;
-      border-radius: 10px;
-      display: none;
-    }
   </style>
 </head>
 <body>
   <div class="login-card">
     <h2>عطر<span>ية</span> – Admin</h2>
-    <input type="email" id="emailInput" placeholder="البريد الإلكتروني" value="ovs@gmail.com" required>
-    <input type="password" id="passwordInput" placeholder="كلمة المرور" value="OVSCMD" required>
+    <input type="password" id="passwordInput" placeholder="كلمة المرور" required>
     <button id="loginBtn">تسجيل الدخول</button>
-    <p class="error-msg" id="errorMsg">بيانات الدخول غير صحيحة</p>
-    <div id="detailedError"></div>
+    <p class="error-msg" id="errorMsg">كلمة المرور غير صحيحة</p>
   </div>
 
-  <script type="module">
-    import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './config.js';
+  <script>
+    // كلمة المرور الثابتة (غيرها لما تحب)
+    const ADMIN_PASSWORD = "CMD";
 
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const errorMsg = document.getElementById('errorMsg');
-    const detailedError = document.getElementById('detailedError');
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const password = document.getElementById('passwordInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
 
-    // التحقق من حالة تسجيل الدخول
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (password === ADMIN_PASSWORD) {
+        // خزن في المتصفح أنه مسجل دخول
+        localStorage.setItem('adminLoggedIn', 'true');
         window.location.href = 'admin.html';
-      }
-    });
-
-    loginBtn.addEventListener('click', async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      
-      errorMsg.style.display = 'none';
-      detailedError.style.display = 'none';
-
-      if (!email || !password) {
-        errorMsg.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور';
-        errorMsg.style.display = 'block';
-        return;
-      }
-      
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        // هيتحول تلقائياً عن طريق onAuthStateChanged
-      } catch (error) {
-        console.error("خطأ Firebase:", error);
-        // عرض الخطأ الحقيقي من Firebase
-        detailedError.style.display = 'block';
-        detailedError.textContent = '❌ ' + error.message;
-        
-        // لو عايز تظهر الرسالة العامة برضه
-        errorMsg.textContent = 'فشل تسجيل الدخول، تحقق من البيانات';
+      } else {
         errorMsg.style.display = 'block';
       }
     });
+
+    // لو ضغط Enter
+    document.getElementById('passwordInput').addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('loginBtn').click();
+      }
+    });
+
+    // لو كان مسجل دخول قبل كده، يحوله مباشرة
+    if (localStorage.getItem('adminLoggedIn') === 'true') {
+      window.location.href = 'admin.html';
+    }
   </script>
 </body>
 </html>
