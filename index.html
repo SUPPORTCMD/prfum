@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عطرية – متجر عطور فاخرة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">عطر<span>ية</span></div>
+    <a href="admin.html" style="color: #666; text-decoration: none; font-weight: 600;">لوحة التحكم</a>
+  </header>
+
+  <main>
+    <section class="categories-grid" id="categoriesContainer">
+      <!-- سيتم تحميل الأقسام من Firebase -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { db, ref, onValue } from './config.js';
+
+    const container = document.getElementById('categoriesContainer');
+
+    onValue(ref(db, 'categories'), (snapshot) => {
+      const data = snapshot.val();
+      container.innerHTML = '';
+      if (data) {
+        Object.keys(data).forEach(key => {
+          const cat = data[key];
+          const card = document.createElement('div');
+          card.className = 'category-card';
+          card.innerHTML = `
+            <img src="${cat.image || 'images/default-category.jpg'}" alt="${cat.name}">
+            <h3>${cat.name}</h3>
+          `;
+          card.addEventListener('click', () => {
+            // توجيه إلى صفحة المنتجات مع تحديد القسم (سنستخدم product.html مع query)
+            window.location.href = `product.html?category=${key}`;
+          });
+          container.appendChild(card);
+        });
+      } else {
+        container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">لا توجد أقسام حالياً</p>';
+      }
+    });
+  </script>
+</body>
+</html>
