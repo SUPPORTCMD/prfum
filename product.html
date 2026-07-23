@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تفاصيل العطر</title>
+  <title>براند OVS</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo">عطر<span>ية</span></div>
+    <div class="logo">OV<span>S</span></div>
     <a href="index.html" style="color: #666; text-decoration: none; font-weight: 600;">الرئيسية</a>
   </header>
 
@@ -135,6 +135,18 @@
             console.error(error);
           }
         });
+        const order = {
+  productId: id,
+  productName: product.name,
+  quantity,
+  totalPrice: parseFloat(priceDisplay.textContent) * quantity,
+  customerName: formData.get('customerName'),
+  address: formData.get('address'),
+  phone: formData.get('phone'),
+  notes: formData.get('notes'),
+  status: 'pending', // pending = قيد المراجعة
+  createdAt: new Date().toISOString()
+};
 
         updatePrice();
       });
