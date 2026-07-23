@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل العطر</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">عطر<span>ية</span></div>
+    <a href="index.html" style="color: #666; text-decoration: none; font-weight: 600;">الرئيسية</a>
+  </header>
+
+  <div class="product-container" id="productContainer">
+    <!-- سيتم ملؤها بواسطة JavaScript -->
+  </div>
+
+  <script type="module">
+    import { db, ref, onValue, push, set } from './config.js';
+
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    const categoryId = params.get('category');
+
+    const container = document.getElementById('productContainer');
+
+    // إذا لم يكن هناك productId، نعرض أول منتج في هذا القسم (أو قائمة)
+    let targetProductId = productId;
+
+    function loadProduct(id) {
+      onValue(ref(db, `products/${id}`), (snapshot) => {
+        const product = snapshot.val();
+        if (!product) {
+          container.innerHTML = '<p>المنتج غير موجود</p>';
+          return;
+        }
+
+        // إنشاء هيكل الصفحة
+        container.innerHTML = `
+          <div class="product-gallery">
+            <img class="main-img" id="mainImage" src="${product.images?.[0] || 'images/default.jpg'}" alt="${product.name}">
+            <div class="thumbnails" id="thumbnails">
+              ${product.images?.map(img => `<img src="${img}" alt="صورة" class="${img === product.images[0] ? 'active' : ''}">`).join('') || ''}
+            </div>
+          </div>
+          <div class="product-info">
+            <h1>${product.name}</h1>
+            <div>
+              <span class="price" id="displayPrice">${product.salePrice || product.price}</span>
+              <span class="old-price">${product.price}</span>
+            </div>
+            <p class="description">${product.description || 'لا يوجد وصف'}</p>
+
+            <div class="quantity-selector">
+              <button id="decreaseQty">−</button>
+              <span id="qtyDisplay">1</span>
+              <button id="increaseQty">+</button>
+            </div>
+
+            <form class="order-form" id="orderForm">
+              <input type="text" placeholder="الاسم الكامل" required name="customerName">
+              <input type="text" placeholder="العنوان" required name="address">
+              <input type="tel" placeholder="رقم الهاتف" required name="phone">
+              <textarea placeholder="ملاحظات إضافية (اختياري)" name="notes" rows="3"></textarea>
+              <button type="submit">اطلب الآن</button>
+            </form>
+          </div>
+        `;
+
+        // منطق تغيير الكمية والسعر
+        let quantity = 1;
+        const qtyDisplay = document.getElementById('qtyDisplay');
+        const priceDisplay = document.getElementById('displayPrice');
+        const decreaseBtn = document.getElementById('decreaseQty');
+        const increaseBtn = document.getElementById('increaseQty');
+
+        const updatePrice = () => {
+          // إذا كان هناك خصم حسب الكمية
+          const discounts = product.quantityDiscounts || {};
+          let price = discounts[quantity] || product.salePrice || product.price;
+          priceDisplay.textContent = price;
+        };
+
+        decreaseBtn.addEventListener('click', () => {
+          if (quantity > 1) {
+            quantity--;
+            qtyDisplay.textContent = quantity;
+            updatePrice();
+          }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+          quantity++;
+          qtyDisplay.textContent = quantity;
+          updatePrice();
+        });
+
+        // تبديل الصورة المصغرة
+        document.getElementById('thumbnails').addEventListener('click', (e) => {
+          if (e.target.tagName === 'IMG') {
+            document.getElementById('mainImage').src = e.target.src;
+            document.querySelectorAll('.thumbnails img').forEach(img => img.classList.remove('active'));
+            e.target.classList.add('active');
+          }
+        });
+
+        // إرسال الطلب
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const order = {
+            productId: id,
+            productName: product.name,
+            quantity,
+            totalPrice: parseFloat(priceDisplay.textContent) * quantity,
+            customerName: formData.get('customerName'),
+            address: formData.get('address'),
+            phone: formData.get('phone'),
+            notes: formData.get('notes'),
+            createdAt: new Date().toISOString()
+          };
+
+          try {
+            const newOrderRef = push(ref(db, 'orders'));
+            await set(newOrderRef, order);
+            alert('تم استلام طلبك بنجاح! سنتصل بك قريباً.');
+            e.target.reset();
+            quantity = 1;
+            qtyDisplay.textContent = 1;
+            updatePrice();
+          } catch (error) {
+            alert('حدث خطأ، حاول مرة أخرى.');
+            console.error(error);
+          }
+        });
+
+        updatePrice();
+      });
+    }
+
+    // إذا كان هناك productId نحمله مباشرة
+    if (targetProductId) {
+      loadProduct(targetProductId);
+    } else if (categoryId) {
+      // جلب أول منتج في هذا القسم
+      onValue(ref(db, 'products'), (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const firstProduct = Object.keys(data).find(key => data[key].categoryId === categoryId);
+          if (firstProduct) {
+            loadProduct(firstProduct);
+          } else {
+            container.innerHTML = '<p>لا توجد منتجات في هذا القسم</p>';
+          }
+        } else {
+          container.innerHTML = '<p>لا توجد منتجات</p>';
+        }
+      });
+    } else {
+      // لا يوجد معرف، نعرض رسالة
+      container.innerHTML = '<p>يرجى اختيار منتج من القائمة</p>';
+    }
+  </script>
+</body>
+</html>
