@@ -65,15 +65,26 @@
       margin-top: 10px;
       display: none;
     }
+    #detailedError {
+      color: #d32f2f;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 10px;
+      background: #ffebee;
+      padding: 10px;
+      border-radius: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="login-card">
     <h2>عطر<span>ية</span> – Admin</h2>
-    <input type="email" id="emailInput" placeholder="البريد الإلكتروني" required>
-    <input type="password" id="passwordInput" placeholder="كلمة المرور" required>
+    <input type="email" id="emailInput" placeholder="البريد الإلكتروني" value="ovs@gmail.com" required>
+    <input type="password" id="passwordInput" placeholder="كلمة المرور" value="OVSCMD" required>
     <button id="loginBtn">تسجيل الدخول</button>
     <p class="error-msg" id="errorMsg">بيانات الدخول غير صحيحة</p>
+    <div id="detailedError"></div>
   </div>
 
   <script type="module">
@@ -83,6 +94,7 @@
     const passwordInput = document.getElementById('passwordInput');
     const loginBtn = document.getElementById('loginBtn');
     const errorMsg = document.getElementById('errorMsg');
+    const detailedError = document.getElementById('detailedError');
 
     // التحقق من حالة تسجيل الدخول
     onAuthStateChanged(auth, (user) => {
@@ -94,17 +106,28 @@
     loginBtn.addEventListener('click', async () => {
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
+      
+      errorMsg.style.display = 'none';
+      detailedError.style.display = 'none';
+
       if (!email || !password) {
-        errorMsg.style.display = 'block';
         errorMsg.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور';
+        errorMsg.style.display = 'block';
         return;
       }
+      
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        // سيتم التوجيه تلقائياً عبر onAuthStateChanged
+        // هيتحول تلقائياً عن طريق onAuthStateChanged
       } catch (error) {
+        console.error("خطأ Firebase:", error);
+        // عرض الخطأ الحقيقي من Firebase
+        detailedError.style.display = 'block';
+        detailedError.textContent = '❌ ' + error.message;
+        
+        // لو عايز تظهر الرسالة العامة برضه
+        errorMsg.textContent = 'فشل تسجيل الدخول، تحقق من البيانات';
         errorMsg.style.display = 'block';
-        errorMsg.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
       }
     });
   </script>
