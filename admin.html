@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* تنسيقات إضافية للوحة التحكم */
     .admin-panel { max-width: 1300px; margin: 30px auto; padding: 20px; }
     .admin-panel h2 { margin-bottom: 20px; font-size: 24px; }
     .add-product-form {
@@ -93,17 +92,22 @@
     import { db, ref, set, push, onValue, remove, update } from './config.js';
     import { auth, onAuthStateChanged, signOut } from './config.js';
 
-    // التحقق من تسجيل الدخول
+    // 1. التحقق من تسجيل الدخول
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = 'login.html';
       }
     });
 
-    // زر تسجيل الخروج
+    // 2. زر تسجيل الخروج (موجود في الهيدر)
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await signOut(auth);
-      window.location.href = 'login.html';
+      try {
+        await signOut(auth);
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error("خطأ في تسجيل الخروج:", error);
+        alert("حدث خطأ أثناء تسجيل الخروج، حاول مرة أخرى.");
+      }
     });
 
     // ====== الأقسام ======
@@ -146,11 +150,16 @@
       const name = document.getElementById('catName').value;
       const image = document.getElementById('catImage').value;
       if (name && image) {
-        const newCatRef = push(ref(db, 'categories'));
-        await set(newCatRef, { name, image });
-        document.getElementById('catName').value = '';
-        document.getElementById('catImage').value = '';
-        alert('✅ تم إضافة القسم');
+        try {
+          const newCatRef = push(ref(db, 'categories'));
+          await set(newCatRef, { name, image });
+          document.getElementById('catName').value = '';
+          document.getElementById('catImage').value = '';
+          alert('✅ تم إضافة القسم بنجاح!');
+        } catch (error) {
+          console.error(error);
+          alert('❌ حدث خطأ في إضافة القسم، تأكد من اتصال Firebase.');
+        }
       }
     });
 
@@ -234,19 +243,23 @@
       const submitBtn = document.querySelector('#addProductForm button[type="submit"]');
       const editId = submitBtn.dataset.editId;
 
-      if (editId) {
-        await update(ref(db, `products/${editId}`), productData);
-        submitBtn.textContent = '➕ إضافة منتج';
-        delete submitBtn.dataset.editId;
-        alert('✅ تم تحديث المنتج');
-      } else {
-        const newRef = push(ref(db, 'products'));
-        await set(newRef, productData);
-        alert('✅ تم إضافة المنتج');
+      try {
+        if (editId) {
+          await update(ref(db, `products/${editId}`), productData);
+          submitBtn.textContent = '➕ إضافة منتج';
+          delete submitBtn.dataset.editId;
+          alert('✅ تم تحديث المنتج');
+        } else {
+          const newRef = push(ref(db, 'products'));
+          await set(newRef, productData);
+          alert('✅ تم إضافة المنتج');
+        }
+        loadProducts();
+        document.getElementById('addProductForm').reset();
+      } catch (error) {
+        console.error(error);
+        alert('❌ حدث خطأ، تأكد من بيانات Firebase');
       }
-
-      loadProducts();
-      document.getElementById('addProductForm').reset();
     });
 
     // ====== الطلبات ======
