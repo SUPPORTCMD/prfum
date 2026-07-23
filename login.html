@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - لوحة التحكم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+    body {
+      background: #f8f8f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      direction: rtl;
+    }
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #1a1a1a;
+    }
+    .login-card h2 span { color: #c9a94e; }
+    .login-card input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      transition: 0.2s;
+    }
+    .login-card input:focus {
+      border-color: #c9a94e;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(201, 169, 78, 0.2);
+    }
+    .login-card button {
+      width: 100%;
+      padding: 16px;
+      background: #c9a94e;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .login-card button:hover {
+      background: #b8942e;
+      transform: scale(1.02);
+    }
+    .error-msg {
+      color: #ff6b6b;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2>عطر<span>ية</span> – Admin</h2>
+    <input type="email" id="emailInput" placeholder="البريد الإلكتروني" required>
+    <input type="password" id="passwordInput" placeholder="كلمة المرور" required>
+    <button id="loginBtn">تسجيل الدخول</button>
+    <p class="error-msg" id="errorMsg">بيانات الدخول غير صحيحة</p>
+  </div>
+
+  <script type="module">
+    import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './config.js';
+
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // التحقق من حالة تسجيل الدخول
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'admin.html';
+      }
+    });
+
+    loginBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      if (!email || !password) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور';
+        return;
+      }
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // سيتم التوجيه تلقائياً عبر onAuthStateChanged
+      } catch (error) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      }
+    });
+  </script>
+</body>
+</html>
