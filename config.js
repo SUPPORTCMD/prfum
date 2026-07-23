@@ -5,7 +5,7 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
 
 // 🔥🔥🔥 بياناتك بالضبط (من اللقطة اللي بعتها) 🔥🔥🔥
 const firebaseConfig = {
-  apiKey: "AIzaSyBvNcTEgRq_ghnGNnkTzF39q0fz-xnZbts",
+  apiKey: "AIzaSyC6Ks_YBbBLWijekEo2kELjiZ3ewR6fzrU",
   authDomain: "prfum-b8275.firebaseapp.com",
   databaseURL: "https://prfum-b8275-default-rtdb.firebaseio.com",
   projectId: "prfum-b8275",
